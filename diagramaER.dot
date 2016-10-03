@@ -27,14 +27,17 @@ graph diagramaER {
   CódigoCursou [shape=plaintext, label="Código"]
 
    // Aluno
-  Email [shape=plaintext]
-  Telefone [shape=plaintext]
-  Idade [shape=plaintext]
+  IDAluno [shape=plaintext, label="ID"]
   NomeALuno [shape=plaintext, label="Nome"]
   DocumentoAluno [shape=plaintext, label="Documento"]
+  Telefone [shape=plaintext]
+  Email [shape=plaintext]
 
    // Matrícula
-  NúmeroMatricula [shape=plaintext, label="Número"]
+  IDMatrícula [shape=plaintext, label="ID"]
+  NúmeroMatrícula [shape=plaintext, label="Número"]
+  AlunoMatrícula [shape=plaintext, label="Aluno"]
+  CursoMatrícula [shape=plaintext, label="Curso"]
 
    // Pedido De Matrícula
   Sessão [shape=plaintext]
@@ -52,16 +55,25 @@ graph diagramaER {
   SemestreAt [shape=plaintext, label="Semestre"]
 
    // Disciplina
-  NomeDis [shape=plaintext, label="Nome"]
+  IDDisciplina [shape=plaintext, label="ID"]
   Código [shape=plaintext]
-  CH [shape=plaintext, label="Carga horária"]
+  NomeDisciplina [shape=plaintext, label="Nome"]
+  CHDisciplina [shape=plaintext, label="Carga horária"]
+  CHMinDisciplina [shape=plaintext, label="Carga horária mínima"]
 
    // Curso
+  IDCurso [shape=plaintext, label="ID"]
   NúmeroCurso [shape=plaintext, label="Número"]
+  CHMinCurso [shape=plaintext, label="Campus horária mínima"]
+  CHMaxCurso [shape=plaintext, label="Campus horária máxima"]
   NomeCurso [shape=plaintext, label="Nome"]
+  CampusCurso [shape=plaintext, label="Campus"]
 
    // Currículo
+  IDCurrículo [shape=plaintext, label="ID"]
+  CursoCurrículo [shape=plaintext, label="Curso"]
   Implantação [shape=plaintext]
+  DisciplinaCurrículo [shape=plaintext, label="Disciplina"]
 
    // Professor
   DocumentoPro [shape=plaintext, label="Documento"]
@@ -73,6 +85,7 @@ graph diagramaER {
   CHmínimaPre [shape=plaintext, label="Carga horária mínima"]
 
    // Campus
+  IDCampus [shape=plaintext, label="ID"]
   NomeCampus [shape=plaintext, label="Nome"]
   
 
@@ -98,14 +111,18 @@ graph diagramaER {
   Cursou -- CódigoCursou
 
    // Aluno e atributos
-  Aluno -- Email
-  Aluno -- Telefone
-  Aluno -- Idade
+  Aluno -- IDAluno
   Aluno -- NomeALuno
   Aluno -- DocumentoAluno
+  Aluno -- Telefone
+  Aluno -- Email
 
    // Matrícula e atributos
-  Matrícula -- NúmeroMatricula
+  Matrícula -- IDMatrícula
+  Matrícula -- NúmeroMatrícula
+  Matrícula -- AlunoMatrícula
+  Matrícula -- CursoMatrícula
+
 
    // Pedido De Matrícula e atributos
   PedidoMatrícula -- Sessão
@@ -123,16 +140,25 @@ graph diagramaER {
   Semestre -- SemestreAt
 
    // Disciplina e atributos
-  Disciplina -- NomeDis
+  Disciplina -- IDDisciplina
   Disciplina -- Código
-  Disciplina -- CH
+  Disciplina -- NomeDisciplina
+  Disciplina -- CHDisciplina
+  Disciplina -- CHMinDisciplina
 
    // Curso e atributos
+  Curso -- IDCurso
   Curso -- NúmeroCurso
+  Curso -- CHMinCurso
+  Curso -- CHMaxCurso
   Curso -- NomeCurso
+  Curso -- CampusCurso
 
    // Currículo e atributos
+  Currículo -- IDCurrículo
+  Currículo -- CursoCurrículo
   Currículo -- Implantação
+  Currículo -- DisciplinaCurrículo
 
    // Professor
   Professor -- DocumentoPro
@@ -144,6 +170,7 @@ graph diagramaER {
   PréRequisito -- CHmínimaPre
 
    // Campus
+  Campus -- IDCampus
   Campus -- NomeCampus
  
 
