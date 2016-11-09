@@ -1,6 +1,9 @@
 var express = require('express');
+var myParser = require("body-parser");
 var app = express();
 var router = require('./routes/index')
+
+app.use(myParser.urlencoded({extended : true}));
 
 // TESTES
 /*
@@ -23,8 +26,8 @@ methodNotAllowed = function(req, res)
     res.send('405 Method Not Allowed');
 };
 
-
 app.post('/login', router.login).all('/login', methodNotAllowed);
+app.post('/carga-horaria', router.carga_horaria).all('/carga-horaria', methodNotAllowed);
 
 
 var server = app.listen(3000);
