@@ -4,7 +4,7 @@ var connection = mysql.createConnection
 	{
 		host     : 'localhost',
 		user     : 'root',
-		password : '',
+		password : 'engtelecom123',
 		database : 'bcd'
 	}
 );

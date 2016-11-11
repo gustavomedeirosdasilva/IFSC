@@ -6,7 +6,7 @@ var router = require('./routes/index')
 app.use(myParser.urlencoded({extended : true}));
 
 // TESTES
-app.get('/', function(req, res) {
+app.get('/js/', function(req, res) {
     res.status(200);
     res.json(JSON.parse('{"teste": "opa"}'));
 });
@@ -18,9 +18,9 @@ methodNotAllowed = function(req, res)
     res.send('405 Method Not Allowed');
 };
 
-app.post('/login', router.login).all('/login', methodNotAllowed);
-app.post('/carga-horaria', router.carga_horaria).all('/carga-horaria', methodNotAllowed);
-app.post('/pre-requisito', router.pre-requisito).all('/pre-requisito', methodNotAllowed);
+app.post('/js/login', router.login).all('/js/login', methodNotAllowed);
+app.post('/js/carga-horaria', router.carga_horaria).all('/js/carga-horaria', methodNotAllowed);
+app.post('/js/pre-requisito', router.pre_requisito).all('/js/pre-requisito', methodNotAllowed);
 
 
 var server = app.listen(3000);
