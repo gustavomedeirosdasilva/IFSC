@@ -1,0 +1,109 @@
+<html>
+<head>
+    <title>Sinestesia</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="bundle.js" type="text/javascript"></script>
+</head>
+<body>
+    Room Name: <input type="textarea" id="in_roomName"></br>
+    User Name: <input type="textarea" id="in_userName"></br>
+    <button id="bt_createRoom">Create room</button></br>
+    <button id="bt_joinRoom">Join room</button></br>
+    <button id="bt_exitRoom">Exit room</button></br>
+
+    Data to send: <input type="textarea" id="in_data"></br>
+    <button id="bt_sendData">Send data</button></br>
+
+
+    <script type="text/javascript">
+
+    var in_roomName = document.getElementById('in_roomName');
+    var in_userName = document.getElementById('in_userName');
+    var bt_createRoom = document.getElementById('bt_createRoom');
+    var bt_joinRoom = document.getElementById('bt_joinRoom');
+    var bt_exitRoom = document.getElementById('bt_exitRoom');
+    
+    bt_createRoom.addEventListener('click', function (e) {
+        CreateRoom(in_roomName.value, in_userName.value);
+    });
+
+    bt_joinRoom.addEventListener('click', function (e) {
+        JoinRoom(in_roomName.value, in_userName.value);
+    });
+
+    bt_exitRoom.addEventListener('click', function (e) {
+        ExitRoom(in_roomName.value);
+    });
+
+
+    var in_data = document.getElementById('in_data');
+    var bt_sendData = document.getElementById('bt_sendData');
+
+    bt_sendData.addEventListener('click', function (e) {
+        SendData(in_data.value);
+    });
+
+
+    // Handle for reply from server of CreateRoom.
+    function CreateRoomReply(msg) {
+        if (msg.status) {
+            switch (msg.status) {
+                case 'OK':
+                    alert('OK: ' + msg.description);
+                    break;
+                case 'NOTOK':
+                    alert('NOTOK: ' + msg.description);
+                    break;
+                case 'ERROR':
+                    alert('ERROR: ' + msg.description);
+                    break;
+                default:
+            }
+        }
+    }
+
+    // Handle for reply from server of JoinRoom.
+    function JoinRoomReply(msg) {
+        if (msg.status) {
+            switch (msg.status) {
+                case 'OK':
+                    alert('OK: ' + msg.description);
+                    break;
+                case 'NOTOK':
+                    alert('NOTOK: ' + msg.description);
+                    break;
+                case 'ERROR':
+                    alert('ERROR: ' + msg.description);
+                    break;
+                default:
+            }
+        }
+    }
+
+    // Handle for reply from server of ExitRoom.
+    function ExitRoomReply(msg) {
+        if (msg.status) {
+            switch (msg.status) {
+                case 'OK':
+                    alert('OK: ' + msg.description);
+                    break;
+                case 'NOTOK':
+                    alert('NOTOK: ' + msg.description);
+                    break;
+                case 'ERROR':
+                    alert('ERROR: ' + msg.description);
+                    break;
+                default:
+            }
+        }
+    }
+
+    // Handle for Data sent from server.
+    function RecvData(msg) {
+        alert('Data: ' + msg); 
+    }
+
+    </script>
+
+</body>
+</html>
