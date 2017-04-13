@@ -3,105 +3,197 @@
     <title>Sinestesia</title>
     <script src="/socket.io/socket.io.js"></script>
     <script src="bundle.js" type="text/javascript"></script>
+    <style type = "text/css">
+        body {
+        margin: 0;
+        padding: 0;
+      }
+        #ca1{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
+        #ca2{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
+        #ca3{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
+        #canvas
+        {
+            border: 5px solid black;
+            background-size:100%;
+        }
+    </style>
 </head>
+<!--<body bgcolor = "black">-->
 <body>
+    <center><canvas id = "ca1" widht = "300" height = "80"></canvas></center>
+    <center><canvas id = "ca2" widht = "80" height = "80"></canvas></center>
+    <center><canvas id = "ca3" widht = "80" height = "80"></canvas></center>
+
+    
     Room Name: <input type="textarea" id="in_roomName"></br>
     User Name: <input type="textarea" id="in_userName"></br>
     <button id="bt_createRoom">Create room</button></br>
     <button id="bt_joinRoom">Join room</button></br>
     <button id="bt_exitRoom">Exit room</button></br>
 
-    Data to send: <input type="textarea" id="in_data"></br>
-    <button id="bt_sendData">Send data</button></br>
+    <!--Data to send: <input type="textarea" id="in_data"></br>-->
+    <!--<button id="bt_sendData">Send data</button></br>-->
 
-
+    <!-- Draw logic. -->
     <script type="text/javascript">
+        var element;
+        var cor1="magenta",cor2="lightblue",cor3="red";
 
-    var in_roomName = document.getElementById('in_roomName');
-    var in_userName = document.getElementById('in_userName');
-    var bt_createRoom = document.getElementById('bt_createRoom');
-    var bt_joinRoom = document.getElementById('bt_joinRoom');
-    var bt_exitRoom = document.getElementById('bt_exitRoom');
+        window.onload = function()
+        {
+            draw();
+            canvasEvent();
+        }
+
+        function draw()
+        {
+            var ctx1 = document.getElementById("ca1").getContext("2d");
+            ctx1.fillStyle = cor1;
+            ctx1.fillRect(0,0,300,80);
+            ctx1.strokeRect(0,0,300,80);
+
+            var ctx2 = document.getElementById("ca2").getContext("2d");
+            ctx2.fillStyle = "lightblue";
+            ctx2.fillRect(0,0,300,80);
+            ctx2.strokeRect(0,0,300,80);
+
+            var ctx3 = document.getElementById("ca3").getContext("2d");
+            ctx3.fillStyle = "red";
+            ctx3.fillRect(0,0,300,80);
+            ctx3.strokeRect(0,0,300,80);
+        }
+
+        function canvasEvent()
+        {
+            var c1 = document.getElementById("ca1");
+            var ctx1 = c1.getContext("2d"); 
+            ctx1.rect(0,0,300,80);
+            ctx1.stroke();              
+            c1.addEventListener("mouseover", function(){hover("ca1")}, false);
+            c1.addEventListener("mouseout", function(){hoverout(c1,cor1)}, false);
+
+            var c2 = document.getElementById("ca2");
+            var ctx2 = c2.getContext("2d");
+            ctx2.rect(0,0,300,80);
+            ctx2.stroke();               
+            c2.addEventListener("mouseover", function(){hover("ca2")}, false);
+            c2.addEventListener("mouseout", function(){hoverout(c2,cor2)}, false);
+
+            var c3 = document.getElementById("ca3");
+            var ctx3 = c3.getContext("2d");
+            ctx3.rect(0,0,300,80);
+            ctx3.stroke();               
+            c3.addEventListener("mouseover", function(){hover("ca3")}, false);
+            c3.addEventListener("mouseout", function(){hoverout(c3,cor3)}, false);
+        }
+
+        function hover(id)
+        {
+            var c = document.getElementById(id);
+            var ctx = c.getContext("2d");
+            //ctx.fillStyle = 'green';
+            ctx.fill();
+            //alert(ctx.fillStyle);
+            SendData(ctx.fillStyle);
+        }
+
+        function hoverout(id,cor)
+        {
+            var ctx = id.getContext("2d");
+            //ctx.fillStyle = cor;
+            ctx.fill();
+            SendData('#ffffff'); // Indica que o mouse está fora do objeto.
+        }
+    </script>
+
+    <!-- WebRTC (datachannel) logic. -->
+    <script type="text/javascript">
+        var in_roomName = document.getElementById('in_roomName');
+        var in_userName = document.getElementById('in_userName');
+        var bt_createRoom = document.getElementById('bt_createRoom');
+        var bt_joinRoom = document.getElementById('bt_joinRoom');
+        var bt_exitRoom = document.getElementById('bt_exitRoom');
+        
+        bt_createRoom.addEventListener('click', function (e) {
+            CreateRoom(in_roomName.value, in_userName.value);
+        });
     
-    bt_createRoom.addEventListener('click', function (e) {
-        CreateRoom(in_roomName.value, in_userName.value);
-    });
-
-    bt_joinRoom.addEventListener('click', function (e) {
-        JoinRoom(in_roomName.value, in_userName.value);
-    });
-
-    bt_exitRoom.addEventListener('click', function (e) {
-        ExitRoom(in_roomName.value);
-    });
-
-
-    var in_data = document.getElementById('in_data');
-    var bt_sendData = document.getElementById('bt_sendData');
-
-    bt_sendData.addEventListener('click', function (e) {
-        SendData(in_data.value);
-    });
-
-
-    // Handle for reply from server of CreateRoom.
-    function CreateRoomReply(msg) {
-        if (msg.status) {
-            switch (msg.status) {
-                case 'OK':
-                    alert('OK: ' + msg.description);
-                    break;
-                case 'NOTOK':
-                    alert('NOTOK: ' + msg.description);
-                    break;
-                case 'ERROR':
-                    alert('ERROR: ' + msg.description);
-                    break;
-                default:
+        bt_joinRoom.addEventListener('click', function (e) {
+            JoinRoom(in_roomName.value, in_userName.value);
+        });
+    
+        bt_exitRoom.addEventListener('click', function (e) {
+            ExitRoom(in_roomName.value);
+        });
+    
+    
+        var in_data = document.getElementById('in_data');
+        var bt_sendData = document.getElementById('bt_sendData');
+    
+        bt_sendData.addEventListener('click', function (e) {
+            SendData(in_data.value);
+        });
+    
+    
+        // Handle for reply from server of CreateRoom.
+        function CreateRoomReply(msg) {
+            if (msg.status) {
+                switch (msg.status) {
+                    case 'OK':
+                        alert('OK: ' + msg.description);
+                        break;
+                    case 'NOTOK':
+                        alert('NOTOK: ' + msg.description);
+                        break;
+                    case 'ERROR':
+                        alert('ERROR: ' + msg.description);
+                        break;
+                    default:
+                }
             }
         }
-    }
-
-    // Handle for reply from server of JoinRoom.
-    function JoinRoomReply(msg) {
-        if (msg.status) {
-            switch (msg.status) {
-                case 'OK':
-                    alert('OK: ' + msg.description);
-                    break;
-                case 'NOTOK':
-                    alert('NOTOK: ' + msg.description);
-                    break;
-                case 'ERROR':
-                    alert('ERROR: ' + msg.description);
-                    break;
-                default:
+    
+        // Handle for reply from server of JoinRoom.
+        function JoinRoomReply(msg) {
+            if (msg.status) {
+                switch (msg.status) {
+                    case 'OK':
+                        alert('OK: ' + msg.description);
+                        break;
+                    case 'NOTOK':
+                        alert('NOTOK: ' + msg.description);
+                        break;
+                    case 'ERROR':
+                        alert('ERROR: ' + msg.description);
+                        break;
+                    default:
+                }
             }
         }
-    }
-
-    // Handle for reply from server of ExitRoom.
-    function ExitRoomReply(msg) {
-        if (msg.status) {
-            switch (msg.status) {
-                case 'OK':
-                    alert('OK: ' + msg.description);
-                    break;
-                case 'NOTOK':
-                    alert('NOTOK: ' + msg.description);
-                    break;
-                case 'ERROR':
-                    alert('ERROR: ' + msg.description);
-                    break;
-                default:
+    
+        // Handle for reply from server of ExitRoom.
+        function ExitRoomReply(msg) {
+            if (msg.status) {
+                switch (msg.status) {
+                    case 'OK':
+                        alert('OK: ' + msg.description);
+                        break;
+                    case 'NOTOK':
+                        alert('NOTOK: ' + msg.description);
+                        break;
+                    case 'ERROR':
+                        alert('ERROR: ' + msg.description);
+                        break;
+                    default:
+                }
             }
         }
-    }
-
-    // Handle for Data sent from server.
-    function RecvData(msg) {
-        alert('Data: ' + msg); 
-    }
+    
+        // Handle for Data sent from server.
+        function RecvData(msg) {
+            //alert('Data: ' + msg); 
+            console.log('Data: ' + msg); 
+        }
 
     </script>
 

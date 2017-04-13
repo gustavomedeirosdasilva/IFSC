@@ -57,11 +57,12 @@ function PeerEvents(peerClient) {
         });
     
         peer.on('close', function () {
-            console.log('peer: close');
+            console.log('Warn|Server| peer: close');
+            ExitRoomClosePeer(peer);
         });
         
         peer.on('error', function (err) {
-            console.log('peer: error' + err);
+            console.log('Error|Server| peer: error: '+ err);
         });
     });
 };
@@ -199,6 +200,7 @@ function ExitRoom(peer, msg) {
 
             // If the client is the last in the room. The room is deleted.
             if (index == 0) {
+                console.log('Info|Server| Room: \"' + msg.roomName + '\" was closed.');
                 rooms.splice(rooms.indexOf(r), 1);
             }
 
@@ -224,6 +226,32 @@ function ExitRoom(peer, msg) {
         console.log('Warn|Server -> Client| ', replyMsg);
     }
 }
+
+function ExitRoomClosePeer(peer) {
+    index = -1;
+    for (i in clients) {
+        if (clients[i].peer == peer) {
+            index = i;
+        }
+    }
+
+    if (index != -1) {
+
+        r = rooms.find(obj => obj.roomName === clients[index].roomName);
+
+        console.log('Info|Server| ExitRoom: peer \"' + r.clients[i].client.peerId + '\" left the room \"' + r.clients[i].client.roomName + '\".');
+
+        // If the client is the last in the room. The room is deleted.
+        if (index == 0) {
+            console.log('Info|Server| Room: \"' + r.clients[i].client.roomName + '\" was closed.');
+            rooms.splice(rooms.indexOf(r), 1);
+        }
+
+        clients.splice(index, 1);
+
+    }
+}
+
 
 
 ////////////////////////////////////////
