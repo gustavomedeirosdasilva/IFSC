@@ -46,7 +46,7 @@ function PeerEvents(peerClient) {
             peerClient.connect(lastId, {wrtc: wrtc});
         }
     });
-    
+
     peerClient.on('peer', function (peer) {
         peer.on('connect', function () {
             //peer.send('hey! We are connected');
@@ -152,9 +152,6 @@ function JoinRoom(peer, msg) {
         if (index == -1) {
             client = {'peer': peer, 'userName': msg.userName, 'peerId': msg.peerId, 'roomName': msg.roomName};
             clients.push(client);
-
-            room = {'roomName': msg.roomName, 'clients' : [{'client': client}]};
-            rooms.push(room);
 
             console.log('Info|Server| JoinRoom: peer \"' + msg.peerId + '\" joined in room \"' + msg.roomName + '\".');
 
@@ -262,6 +259,7 @@ function RecvData(peer, msg) {
     for (i in clients) {
         if (clients[i].peer == peer) {
             index = i;
+            break;
         }
     }
 
@@ -277,7 +275,9 @@ function RecvData(peer, msg) {
 }
 
 function SendData(peer, data) {
-    replyMsg = {'msgType': 'DataFromServer', 'msg': data};
-    peer.send(JSON.stringify(replyMsg));
-    console.log('Info|Server -> Client| ', replyMsg);
+    if (peer) {
+        replyMsg = {'msgType': 'DataFromServer', 'msg': data};
+        peer.send(JSON.stringify(replyMsg));
+        console.log('Info|Server -> Client| ', replyMsg);
+    }
 }

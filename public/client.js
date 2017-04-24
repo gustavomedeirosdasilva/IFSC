@@ -73,25 +73,25 @@ window.SendData = SendData;
 
 
 function ReplyFromServer(data) {
-    data = JSON.parse(data);
-
-    if (!data.msgType && !data.msg) {
-        console.log('Invalid data: ', data);
+    dataJSON = JSON.parse(data);
+    
+    if (!dataJSON.msgType && !dataJSON.msg) {
+        console.log('Invalid data: ', dataJSON);
         return;
     }  
-
-    switch (data.msgType) {
+    
+    switch (dataJSON.msgType) {
         case 'CreateRoomReply':
-            CreateRoomReply(data.msg);
+            CreateRoomReply(dataJSON.msg);
             break;
         case 'JoinRoomReply':
-            JoinRoomReply(data.msg);
+            JoinRoomReply(dataJSON.msg);
             break;
         case 'ExitRoomReply':
-            ExitRoomReply(data.msg);
+            ExitRoomReply(dataJSON.msg);
             break;
         case 'DataFromServer':
-            RecvData(data.msg);
+            RecvData(dataJSON.msg);
             break;
         default:
     } 

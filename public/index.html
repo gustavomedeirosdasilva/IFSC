@@ -11,40 +11,47 @@
         #ca1{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
         #ca2{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
         #ca3{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
-        #canvas
-        {
-            border: 5px solid black;
-            background-size:100%;
-        }
+        #ca4{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
+        #ca5{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
+        #ca6{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
     </style>
+
+
 </head>
-<!--<body bgcolor = "black">-->
 <body>
     <center><canvas id = "ca1" widht = "300" height = "80"></canvas></center>
     <center><canvas id = "ca2" widht = "80" height = "80"></canvas></center>
     <center><canvas id = "ca3" widht = "80" height = "80"></canvas></center>
-
-    
+    <center><canvas id = "ca4" widht = "80" height = "80"></canvas></center>
+    <center><canvas id = "ca5" widht = "80" height = "80"></canvas></center>
+    <center><canvas id = "ca6" widht = "80" height = "80"></canvas></center>
+ 
     Room Name: <input type="textarea" id="in_roomName"></br>
     User Name: <input type="textarea" id="in_userName"></br>
     <button id="bt_createRoom">Create room</button></br>
     <button id="bt_joinRoom">Join room</button></br>
     <button id="bt_exitRoom">Exit room</button></br>
 
-    <!--Data to send: <input type="textarea" id="in_data"></br>-->
-    <!--<button id="bt_sendData">Send data</button></br>-->
-
     <!-- Draw logic. -->
-    <script type="text/javascript">
-        var element;
-        var cor1="magenta",cor2="lightblue",cor3="red";
+    <script>
+        var cor1="magenta",cor2="lightblue",cor3="red",cor4 ="blue",cor5="yellow",cor6="grey";
+
+        // **** variável que deve ser enviada no datachannel ****
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        //array que contém as notas(osciladores) ativas(para controle)
+        var arr=[0,0,0,0,0,0,0];
+
+
+        //array que contém os osciladores(frequencias)
+        var osc = {};
 
         window.onload = function()
         {
             draw();
             canvasEvent();
+            
         }
-
         function draw()
         {
             var ctx1 = document.getElementById("ca1").getContext("2d");
@@ -53,56 +60,92 @@
             ctx1.strokeRect(0,0,300,80);
 
             var ctx2 = document.getElementById("ca2").getContext("2d");
-            ctx2.fillStyle = "lightblue";
+            ctx2.fillStyle = cor2;
             ctx2.fillRect(0,0,300,80);
             ctx2.strokeRect(0,0,300,80);
 
             var ctx3 = document.getElementById("ca3").getContext("2d");
-            ctx3.fillStyle = "red";
+            ctx3.fillStyle = cor3;
             ctx3.fillRect(0,0,300,80);
             ctx3.strokeRect(0,0,300,80);
-        }
 
+            var ctx4 = document.getElementById("ca4").getContext("2d");
+            ctx4.fillStyle = cor4;
+            ctx4.fillRect(0,0,300,80);
+            ctx4.strokeRect(0,0,300,80);
+
+            var ctx5 = document.getElementById("ca5").getContext("2d");
+            ctx5.fillStyle = cor5;
+            ctx5.fillRect(0,0,300,80);
+            ctx5.strokeRect(0,0,300,80);
+
+            var ctx6 = document.getElementById("ca6").getContext("2d");
+            ctx6.fillStyle = cor6;
+            ctx6.fillRect(0,0,300,80);
+            ctx6.strokeRect(0,0,300,80);
+        }
         function canvasEvent()
         {
             var c1 = document.getElementById("ca1");
             var ctx1 = c1.getContext("2d"); 
             ctx1.rect(0,0,300,80);
             ctx1.stroke();              
-            c1.addEventListener("mouseover", function(){hover("ca1")}, false);
-            c1.addEventListener("mouseout", function(){hoverout(c1,cor1)}, false);
+            c1.addEventListener("mouseover", function(){hover("ca1",500,1)}, false);
+            c1.addEventListener("mouseout", function(){hoverout(c1,cor1,1,false)}, false);
 
             var c2 = document.getElementById("ca2");
             var ctx2 = c2.getContext("2d");
             ctx2.rect(0,0,300,80);
             ctx2.stroke();               
-            c2.addEventListener("mouseover", function(){hover("ca2")}, false);
-            c2.addEventListener("mouseout", function(){hoverout(c2,cor2)}, false);
+            c2.addEventListener("mouseover", function(){hover("ca2",700,2)}, false);
+            c2.addEventListener("mouseout", function(){hoverout(c2,cor2,2,false)}, false);
 
             var c3 = document.getElementById("ca3");
             var ctx3 = c3.getContext("2d");
             ctx3.rect(0,0,300,80);
             ctx3.stroke();               
-            c3.addEventListener("mouseover", function(){hover("ca3")}, false);
-            c3.addEventListener("mouseout", function(){hoverout(c3,cor3)}, false);
+            c3.addEventListener("mouseover", function(){hover("ca3",1000,3)}, false);
+            c3.addEventListener("mouseout", function(){hoverout(c3,cor3,3,false)}, false);
+
+            var c4 = document.getElementById("ca4");
+            var ctx4 = c4.getContext("2d"); 
+            ctx4.rect(0,0,300,80);
+            ctx4.stroke();              
+            c4.addEventListener("mouseover", function(){hover("ca4",1500,4)}, false);
+            c4.addEventListener("mouseout", function(){hoverout(c4,cor4,4,false)}, false);
+
+            var c5 = document.getElementById("ca5");
+            var ctx5 = c5.getContext("2d"); 
+            ctx5.rect(0,0,300,80);
+            ctx5.stroke();              
+            c5.addEventListener("mouseover", function(){hover("ca5",2000,5)}, false);
+            c5.addEventListener("mouseout", function(){hoverout(c5,cor5,5,false)}, false);
+
+            var c6 = document.getElementById("ca6");
+            var ctx6 = c6.getContext("2d"); 
+            ctx6.rect(0,0,300,80);
+            ctx6.stroke();              
+            c6.addEventListener("mouseover", function(){hover("ca6",2500,6)}, false);
+            c6.addEventListener("mouseout", function(){hoverout(c6,cor6,6,true)}, false);
         }
 
-        function hover(id)
+        function hover(id,f,i)
         {
             var c = document.getElementById(id);
             var ctx = c.getContext("2d");
-            //ctx.fillStyle = 'green';
+            ctx.fillStyle = 'green';
             ctx.fill();
-            //alert(ctx.fillStyle);
-            SendData(ctx.fillStyle);
+
+            SendData({'i': i,'hover': true});
         }
 
-        function hoverout(id,cor)
+        function hoverout(id,cor,i,disable)
         {
             var ctx = id.getContext("2d");
-            //ctx.fillStyle = cor;
+            ctx.fillStyle = cor;
             ctx.fill();
-            SendData('#ffffff'); // Indica que o mouse está fora do objeto.
+
+            SendData({'i': i,'hover': false});
         }
     </script>
 
@@ -124,14 +167,6 @@
     
         bt_exitRoom.addEventListener('click', function (e) {
             ExitRoom(in_roomName.value);
-        });
-    
-    
-        var in_data = document.getElementById('in_data');
-        var bt_sendData = document.getElementById('bt_sendData');
-    
-        bt_sendData.addEventListener('click', function (e) {
-            SendData(in_data.value);
         });
     
     
@@ -188,13 +223,35 @@
                 }
             }
         }
-    
+   
         // Handle for Data sent from server.
         function RecvData(msg) {
             //alert('Data: ' + msg); 
-            console.log('Data: ' + msg); 
-        }
+            console.log('Data: ' + JSON.stringify(msg)); 
 
+        var freq = {};
+        freq[1] = 1000;
+        freq[2] = 2000;
+        freq[3] = 5000;
+        freq[4] = 7000;
+        freq[5] = 10000;
+        freq[6] = 12000;
+ 
+
+            i = msg.i;
+
+            if (msg.hover == true && arr[i] === 0){
+                osc[i] = audioCtx.createOscillator();
+                osc[i].frequency.value = freq[i];
+                osc[i].connect(audioCtx.destination);
+                osc[i].start();
+                arr[i]=1;
+            } else if (msg.hover == false && arr[i] === 1){
+                osc[i].stop();
+                osc[i].disconnect(audioCtx.destination);
+                arr[i]=0;
+            }                        
+        }
     </script>
 
 </body>
