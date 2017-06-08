@@ -1,0 +1,22 @@
+{
+  "name": "IFSC-SDR",
+  "version": "0.0.1",
+  "author": "Gabriel Cantu, Gustavo Paulo Medeiros da Silva, Iago Soares",
+  "description" : "Projeto desenvolvido na disciplina de Circuitos de Rádio Frequência (CRF29009) do curso Engenharia de Telecomunicações - IFSC São José",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+
+  "dependencies" : {
+    "express": "^4.10.7",
+    "http": "*",
+    "socket.io": "^1.4.5",
+    "net": "*",
+    "socket.io-client": "*"
+  },
+
+  "engines": {
+    "node": ">=0.8"
+  }
+}
