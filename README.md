@@ -6,7 +6,7 @@ Desenvolvido pelos alunos: Gabriel Cantu, Gustavo Paulo Medeiros da Silva e Iago
 
 ## Instalação
 
-Instalar o [Node.js](https://nodejs.org/en/download/package-manager/) e o [GNU radio](https://wiki.gnuradio.org/index.php/InstallingGR).
+Instalar o [Node.js](https://nodejs.org/en/download/package-manager/), [rtl-sdr](http://osmocom.org/projects/sdr/wiki/rtl-sdr) e [libcsdr](https://github.com/simonyiszk/csdr)
 Após a instalação entrar no diretório `webserver` e executar o comando: 
 ```
 npm install
@@ -14,19 +14,14 @@ npm install
 
 ## Execução
 
-Ainda no diretório `webserver` executer o seguinte comando:
+Ainda no diretório `webserver` executer o seguinte comando para iniciar o servidor web:
 ```
 npm start
 ```
 
-Retorne ao diretório acima e em um novo terminal execute:
+Após iniciar o servidor execute o seguinte comando:
 ```
-python top_block.py
-```
-
-Ou abra o GNU radio e clique no botão de play:
-```
-gnuradio-companion sdr.grc
+rtl_sdr -s 2880000 -f 209750000 -g 30 - | nc 127.0.0.1 3333
 ```
 
 Por último, abra o seguinte endereço no navegador web:
