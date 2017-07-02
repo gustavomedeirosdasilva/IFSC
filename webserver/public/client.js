@@ -38,6 +38,7 @@ socket.on('fft_data', function (data) {
     clearCanvasFFT();
     drawGridFFT();
     drawFFT();
+    drawWaterfall();
 });
 
 socket.on('audio_data', function (data) {
@@ -173,6 +174,56 @@ function drawText(text, x, y) {
     fft_canvas_ctx.textBaseline="middle";
     fft_canvas_ctx.fillText(text, x, y);
 }
+
+
+var waterfall_canvas = document.getElementById("waterfall_canvas");
+waterfall_canvas.style.backgroundColor = '#0000ff';
+
+var waterfall_canvas_ctx = waterfall_canvas.getContext("2d");
+waterfall_canvas_ctx.canvas.width  = 1024;
+waterfall_canvas_ctx.canvas.height = 300;
+
+var waterfall_canvas_data;
+
+function drawWaterfall() {
+    waterfall_canvas_data = waterfall_canvas_ctx.getImageData(0, 0, waterfall_canvas.width, waterfall_canvas.height);
+    for (var i = 0; i < fft_data.length; i++) {
+        drawWaterfallPixel(i, 0, getColorWaterfall(fft_data[i]));
+    }
+
+    waterfall_canvas_ctx.putImageData(waterfall_canvas_data, 0, 1);
+    waterfall_canvas_ctx.drawImage(waterfall_canvas_ctx.canvas, 0, 0, waterfall_canvas.width, waterfall_canvas.height);
+}
+
+function getColorWaterfall(fft_point) {
+    if (fft_point < -70) return [0, 0, 255];
+    else if (fft_point >= -70 && fft_point < -50) return [255, 255, 0]; 
+    else if (fft_point >= -50 && fft_point < -30) return [255, 69, 0]; 
+    else return [255, 0, 0];
+}
+
+var waterfall_canvas_data;
+
+function drawWaterfall() {
+    waterfall_canvas_data = waterfall_canvas_ctx.getImageData(0, 0, waterfall_canvas.width, waterfall_canvas.height);
+
+    for (var i = 0; i < (fft_data.length)/2; i++) {
+        drawWaterfallPixel(i, 0, getColorWaterfall(fft_data[i*2]));
+    }
+
+    waterfall_canvas_ctx.putImageData(waterfall_canvas_data, 0, 1);
+    waterfall_canvas_ctx.drawImage(waterfall_canvas_ctx.canvas, 0, 0, waterfall_canvas.width, waterfall_canvas.height);
+}
+
+function drawWaterfallPixel(x, y, rgb) {
+    var index = (x + y * waterfall_canvas.width) * 4;
+
+    waterfall_canvas_data.data[index + 0] = rgb[0];
+    waterfall_canvas_data.data[index + 1] = rgb[1];
+    waterfall_canvas_data.data[index + 2] = rgb[2];
+    waterfall_canvas_data.data[index + 3] = 255;
+}
+
 
 ////////////////////////////////////////
 // Timer Logic.
