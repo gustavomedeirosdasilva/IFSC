@@ -2,7 +2,7 @@
 
 Projeto IFSC-SDR desenvolvido na disciplina de Circuitos de Rádio Frequência (CRF29009 2017/1) do curso Engenharia de Telecomunicações - IFSC São José.
 
-Desenvolvido pelos alunos: Gabriel Cantu, Gustavo Paulo Medeiros da Silva e Iago Soares.
+Desenvolvido pelos alunos: Gustavo Paulo Medeiros da Silva e Iago Soares.
 
 ## Instalação
 
