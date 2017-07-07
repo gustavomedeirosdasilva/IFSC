@@ -98,7 +98,6 @@ function Signaling(peer, data) {
     }
 }
 
-
 var rooms = [];
 var clients = [];
 
@@ -236,24 +235,25 @@ function ExitRoomClosePeer(peer) {
 
         r = rooms.find(obj => obj.roomName === clients[index].roomName);
 
-        console.log('Info|Server| ExitRoom: peer \"' + r.clients[i].client.peerId + '\" left the room \"' + r.clients[i].client.roomName + '\".');
+        console.log('Info|Server| ExitRoomClosePeer: peer \"' + r.clients[index].client.peerId + '\" left the room \"' + r.clients[index].client.roomName + '\".');
 
         // If the client is the last in the room. The room is deleted.
-        if (index == 0) {
-            console.log('Info|Server| Room: \"' + r.clients[i].client.roomName + '\" was closed.');
+        if (r.clients.length == 1) {
+            console.log('Info|Server| ExitRoomClosePeer: Room: \"' + r.clients[index].client.roomName + '\" was closed.');
             rooms.splice(rooms.indexOf(r), 1);
         }
 
+        r.clients.splice(index, 1);
         clients.splice(index, 1);
-
     }
 }
-
 
 
 ////////////////////////////////////////
 // Loop logic.
 ////////////////////////////////////////
+var colors = [];
+
 function RecvData(peer, msg) {
     index = -1;
     for (i in clients) {
@@ -264,6 +264,32 @@ function RecvData(peer, msg) {
     }
 
     if (index != -1) {
+        if (msg.hover == true) {
+            cc = colors.find(obj => obj.color === msg.color);
+            if (!cc) {
+                cc = {'color': msg.color, 'count': 1};
+                colors.push(cc);
+            } else {
+                cc.count = cc.count + 1;
+                console.log('Info|Server| RecvData: The color \"' + msg.color + '\" is playing.');
+                return;
+            }
+        } else if (msg.hover == false) {
+            cc = colors.find(obj => obj.color === msg.color);
+            if (cc) {
+                if (cc.count == 1) {
+                    msg = {'color': cc.color, 'hover': false};
+                    delete colors.splice(colors.indexOf(cc), 1);
+                } else {
+                    cc.count = cc.count - 1;
+                    return;
+                }
+            } else {
+                console.log('Info|Server| RecvData: Peer id \"' + clients[i].peerId + '\" cannot stop the color + \"' + msg.color + '\".');
+                return;
+            }
+        }
+
         r = rooms.find(obj => obj.roomName === clients[index].roomName);
         // Send data to all clients in the room.
         for (i in r.clients) {

@@ -1,8 +1,8 @@
 # Sinestesia.
 
-Projeto Sinestesia desenvolvido na disciplina de Sistemas Multimídia (SUS29009) do curso Engenharia de Telecomunicações - IFSC São José.
+Projeto Sinestesia desenvolvido na disciplina de Sistemas Multimídia (SMU29009 2017/1) do curso Engenharia de Telecomunicações - IFSC São José.
 
-Desenvolvido pelos alunos: Fernando Muller da Silva, Gustavo Paulo Medeiros da Silva, Stephany Padilha Guimarães.
+Desenvolvido pelos alunos: Fernando Muller da Silva e Gustavo Paulo Medeiros da Silva.
 
 ## Instalação
 

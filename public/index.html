@@ -1,258 +1,488 @@
 <html>
-<head>
-    <title>Sinestesia</title>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="bundle.js" type="text/javascript"></script>
-    <style type = "text/css">
-        body {
-        margin: 0;
-        padding: 0;
-      }
-        #ca1{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
-        #ca2{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
-        #ca3{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
-        #ca4{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
-        #ca5{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
-        #ca6{background:#FFF; border: #000 3px solid; margin:0px; padding: 0;}
-    </style>
+    <head>
+        <title>Sinestesia</title>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="bundle.js" type="text/javascript"></script>
+    </head>
+    <body> 
+        <center>
+        <video id="video" autoplay="true" style="display:none;"></video>
+        <canvas width='1200' height='400' id='canvas' align='center'></canvas></br>
+        <button id="bt_draw">Redesenhar</button>
+        <button id="bt_notas_musicais">Notas musicais</button>
+        <button id="bt_webcam">Webcam</button>
+        <input type='file' accept='image/*' onchange='loadImg(event)'>
+        </center>
+        </br></br>
 
+        Room Name: <input type="textarea" id="in_roomName"></br>
+        User Name: <input type="textarea" id="in_userName"></br>
+        <button id="bt_createRoom">Create room</button></br>
+        <button id="bt_joinRoom">Join room</button></br>
+        <button id="bt_exitRoom">Exit room</button></br>
 
-</head>
-<body>
-    <center><canvas id = "ca1" widht = "300" height = "80"></canvas></center>
-    <center><canvas id = "ca2" widht = "80" height = "80"></canvas></center>
-    <center><canvas id = "ca3" widht = "80" height = "80"></canvas></center>
-    <center><canvas id = "ca4" widht = "80" height = "80"></canvas></center>
-    <center><canvas id = "ca5" widht = "80" height = "80"></canvas></center>
-    <center><canvas id = "ca6" widht = "80" height = "80"></canvas></center>
- 
-    Room Name: <input type="textarea" id="in_roomName"></br>
-    User Name: <input type="textarea" id="in_userName"></br>
-    <button id="bt_createRoom">Create room</button></br>
-    <button id="bt_joinRoom">Join room</button></br>
-    <button id="bt_exitRoom">Exit room</button></br>
+        <!-- Webcam logic. -->
+        <script>
+            var bt_webcam = document.getElementById('bt_webcam');
 
-    <!-- Draw logic. -->
-    <script>
-        var cor1="magenta",cor2="lightblue",cor3="red",cor4 ="blue",cor5="yellow",cor6="grey";
+            bt_webcam.addEventListener('click', function (e) {
+                clearCanvas(640, 480);
+                onLoad();
+                disableMouseEvent();
+                enableMouseEventVideo();
+            });
 
-        // **** variável que deve ser enviada no datachannel ****
-        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var video, canvas, context, imageData, cameraStream;
 
-        //array que contém as notas(osciladores) ativas(para controle)
-        var arr=[0,0,0,0,0,0,0];
+            function onLoad() {
+                video = document.getElementById("video");
+                canvas = document.getElementById("canvas");
+                context = canvas.getContext("2d");
 
+                // Mirror logic
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
 
-        //array que contém os osciladores(frequencias)
-        var osc = {};
+                navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                if (navigator.getUserMedia) {
+                    function successCallback(stream) {
+                        if (window.webkitURL) {
+                            video.src = window.webkitURL.createObjectURL(stream);
+                        } else if (video.mozSrcObject !== undefined) {
+                            video.mozSrcObject = stream;
+                        } else {
+                            video.src = stream;
+                        }
+                        cameraStream = stream;
+                    }
+                    function errorCallback(error){
+                    }
 
-        window.onload = function()
-        {
-            draw();
-            canvasEvent();
-            
-        }
-        function draw()
-        {
-            var ctx1 = document.getElementById("ca1").getContext("2d");
-            ctx1.fillStyle = cor1;
-            ctx1.fillRect(0,0,300,80);
-            ctx1.strokeRect(0,0,300,80);
+                    navigator.getUserMedia({video: true, audio:false}, successCallback, errorCallback);
 
-            var ctx2 = document.getElementById("ca2").getContext("2d");
-            ctx2.fillStyle = cor2;
-            ctx2.fillRect(0,0,300,80);
-            ctx2.strokeRect(0,0,300,80);
-
-            var ctx3 = document.getElementById("ca3").getContext("2d");
-            ctx3.fillStyle = cor3;
-            ctx3.fillRect(0,0,300,80);
-            ctx3.strokeRect(0,0,300,80);
-
-            var ctx4 = document.getElementById("ca4").getContext("2d");
-            ctx4.fillStyle = cor4;
-            ctx4.fillRect(0,0,300,80);
-            ctx4.strokeRect(0,0,300,80);
-
-            var ctx5 = document.getElementById("ca5").getContext("2d");
-            ctx5.fillStyle = cor5;
-            ctx5.fillRect(0,0,300,80);
-            ctx5.strokeRect(0,0,300,80);
-
-            var ctx6 = document.getElementById("ca6").getContext("2d");
-            ctx6.fillStyle = cor6;
-            ctx6.fillRect(0,0,300,80);
-            ctx6.strokeRect(0,0,300,80);
-        }
-        function canvasEvent()
-        {
-            var c1 = document.getElementById("ca1");
-            var ctx1 = c1.getContext("2d"); 
-            ctx1.rect(0,0,300,80);
-            ctx1.stroke();              
-            c1.addEventListener("mouseover", function(){hover("ca1",500,1)}, false);
-            c1.addEventListener("mouseout", function(){hoverout(c1,cor1,1,false)}, false);
-
-            var c2 = document.getElementById("ca2");
-            var ctx2 = c2.getContext("2d");
-            ctx2.rect(0,0,300,80);
-            ctx2.stroke();               
-            c2.addEventListener("mouseover", function(){hover("ca2",700,2)}, false);
-            c2.addEventListener("mouseout", function(){hoverout(c2,cor2,2,false)}, false);
-
-            var c3 = document.getElementById("ca3");
-            var ctx3 = c3.getContext("2d");
-            ctx3.rect(0,0,300,80);
-            ctx3.stroke();               
-            c3.addEventListener("mouseover", function(){hover("ca3",1000,3)}, false);
-            c3.addEventListener("mouseout", function(){hoverout(c3,cor3,3,false)}, false);
-
-            var c4 = document.getElementById("ca4");
-            var ctx4 = c4.getContext("2d"); 
-            ctx4.rect(0,0,300,80);
-            ctx4.stroke();              
-            c4.addEventListener("mouseover", function(){hover("ca4",1500,4)}, false);
-            c4.addEventListener("mouseout", function(){hoverout(c4,cor4,4,false)}, false);
-
-            var c5 = document.getElementById("ca5");
-            var ctx5 = c5.getContext("2d"); 
-            ctx5.rect(0,0,300,80);
-            ctx5.stroke();              
-            c5.addEventListener("mouseover", function(){hover("ca5",2000,5)}, false);
-            c5.addEventListener("mouseout", function(){hoverout(c5,cor5,5,false)}, false);
-
-            var c6 = document.getElementById("ca6");
-            var ctx6 = c6.getContext("2d"); 
-            ctx6.rect(0,0,300,80);
-            ctx6.stroke();              
-            c6.addEventListener("mouseover", function(){hover("ca6",2500,6)}, false);
-            c6.addEventListener("mouseout", function(){hoverout(c6,cor6,6,true)}, false);
-        }
-
-        function hover(id,f,i)
-        {
-            var c = document.getElementById(id);
-            var ctx = c.getContext("2d");
-            ctx.fillStyle = 'green';
-            ctx.fill();
-
-            SendData({'i': i,'hover': true});
-        }
-
-        function hoverout(id,cor,i,disable)
-        {
-            var ctx = id.getContext("2d");
-            ctx.fillStyle = cor;
-            ctx.fill();
-
-            SendData({'i': i,'hover': false});
-        }
-    </script>
-
-    <!-- WebRTC (datachannel) logic. -->
-    <script type="text/javascript">
-        var in_roomName = document.getElementById('in_roomName');
-        var in_userName = document.getElementById('in_userName');
-        var bt_createRoom = document.getElementById('bt_createRoom');
-        var bt_joinRoom = document.getElementById('bt_joinRoom');
-        var bt_exitRoom = document.getElementById('bt_exitRoom');
-        
-        bt_createRoom.addEventListener('click', function (e) {
-            CreateRoom(in_roomName.value, in_userName.value);
-        });
-    
-        bt_joinRoom.addEventListener('click', function (e) {
-            JoinRoom(in_roomName.value, in_userName.value);
-        });
-    
-        bt_exitRoom.addEventListener('click', function (e) {
-            ExitRoom(in_roomName.value);
-        });
-    
-    
-        // Handle for reply from server of CreateRoom.
-        function CreateRoomReply(msg) {
-            if (msg.status) {
-                switch (msg.status) {
-                    case 'OK':
-                        alert('OK: ' + msg.description);
-                        break;
-                    case 'NOTOK':
-                        alert('NOTOK: ' + msg.description);
-                        break;
-                    case 'ERROR':
-                        alert('ERROR: ' + msg.description);
-                        break;
-                    default:
+                    requestAnimationFrame(tick);
                 }
             }
-        }
     
-        // Handle for reply from server of JoinRoom.
-        function JoinRoomReply(msg) {
-            if (msg.status) {
-                switch (msg.status) {
-                    case 'OK':
-                        alert('OK: ' + msg.description);
-                        break;
-                    case 'NOTOK':
-                        alert('NOTOK: ' + msg.description);
-                        break;
-                    case 'ERROR':
-                        alert('ERROR: ' + msg.description);
-                        break;
-                    default:
+            function tick() {
+                requestAnimationFrame(tick);
+                if (video.readyState === video.HAVE_ENOUGH_DATA){
+                    snapshot();
+                    getAndSendColorVideo();
                 }
             }
-        }
-    
-        // Handle for reply from server of ExitRoom.
-        function ExitRoomReply(msg) {
-            if (msg.status) {
-                switch (msg.status) {
-                    case 'OK':
-                        alert('OK: ' + msg.description);
-                        break;
-                    case 'NOTOK':
-                        alert('NOTOK: ' + msg.description);
-                        break;
-                    case 'ERROR':
-                        alert('ERROR: ' + msg.description);
-                        break;
-                    default:
+
+            function snapshot() {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            }
+
+
+            function stopWebcam() {
+                // Mirror logic
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+
+                if (cameraStream) {
+                    cameraStream.stop();
                 }
             }
-        }
+
+            var cursorX;
+            var cursorY;
+
+            function getPositionVideo(e) {
+                eventLocation = getEventLocation(this, e);
+                context = this.getContext('2d');
+                cursorX = eventLocation.x;
+                cursorY = eventLocation.y;
+            }
+
+            function enableMouseEventVideo() {
+                canvas.addEventListener("mousemove", getPositionVideo, false);
+                canvas.addEventListener("mouseout", getPositionVideo, false);
+            }
+
+            function disableMouseEventVideo() {
+                canvas.removeEventListener("mousemove", getPositionVideo, false);
+                canvas.removeEventListener("mouseout", getPositionVideo, false);
+            }
+
+            function getAndSendColorVideo() {
+               pixelData = context.getImageData(cursorX, cursorY, 1, 1).data; 
+
+               var hex;
+
+               if (pixelData[3] == 0) {
+                   hex = null;
+               } else {
+                   hex = "#" + ("000000" + rgbToHex(pixelData[0], pixelData[1], pixelData[2])).slice(-6);
+               }
+
+               if (hex != old_color) {
+                   if (old_color != null) {
+                       SendData({'color': old_color, 'hover': false});
+                   }
+                   if (hex != null) {
+                       SendData({'color': hex, 'hover': true});
+                   }
+               }
+
+               old_color = hex;
+            }
+        </script>
+
+        <!-- Musical notes logic. -->
+        <script>
+            // Quarta oitava
+            //
+            //   cor     freq   nota
+            // #02c6ea: 261.63 - Dó
+            // #030b4f: 277.18 - Dó# 
+            // #0353cb: 293.66 - Ré
+            // #03a0a2: 311.13 - Ré# 
+            // #03f201: 329.63 - Mi
+            // #044836: 349.23 - Fá
+            // #04a386: 369.99 - Fá#
+            // #05044a: 391.99 - Sol 
+            // #056ad0: 415.30 - Sol#
+            // #05d774: 440.00 - Lá
+            // #064a84: 466.16 - Lá#
+            // #06c470: 493.88 - Si
+
+            var bt_notas_musicais = document.getElementById('bt_notas_musicais');
+
+            bt_notas_musicais.addEventListener('click', function (e) {
+                clearCanvas(1200, 400);
+
+                drawRectAndText(canvas, context, 'Dó'  , '#02c6ea', 0);
+                drawRectAndText(canvas, context, 'Dó#' , '#030b4f', 1);
+                drawRectAndText(canvas, context, 'Ré'  , '#0353cb', 2);
+                drawRectAndText(canvas, context, 'Ré#' , '#03a0a2', 3);
+                drawRectAndText(canvas, context, 'Mi'  , '#03f201', 4);
+                drawRectAndText(canvas, context, 'Fá'  , '#044836', 5);
+                drawRectAndText(canvas, context, 'Fá#' , '#04a386', 6);
+                drawRectAndText(canvas, context, 'Sol' , '#05044a', 7);
+                drawRectAndText(canvas, context, 'Sol#', '#056ad0', 8);
+                drawRectAndText(canvas, context, 'Lá'  , '#05d774', 9);
+                drawRectAndText(canvas, context, 'Lá#' , '#064a84', 10);
+                drawRectAndText(canvas, context, 'Si'  , '#06c470', 11);
+
+                enableMouseEvent();
+                disableMouseEventVideo();
+            });
+
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+
+            function drawRectAndText(canvas, context, text, color, position) {
+                drawRectNM(canvas, context, color, position);
+                textNM(canvas, context, text, color, position);
+            }
+
+            function drawRectNM(canvas, context, color, position) {
+                context.fillStyle = color;
+                context.fillRect(position*canvas.width/12, 0, canvas.width/12, canvas.height/2);
+            }
+
+            function textNM(canvas, context, text, color, position) {
+                context.font = "40px Arial";
+                context.fillStyle = color;
+                context.textAlign = "center";
+                context.fillText(text, position*canvas.width/12 + canvas.width/24, canvas.height/2 + 100);
+            }
+        </script>
+  
+        <!-- Load image logic. -->
+        <script>
+            var loadImg = function(event) {
+                clearCanvas(0, 0);
+                var output = document.getElementById('canvas');
+                var context = output.getContext('2d');
+                var input = event.target;
+                var reader = new FileReader();
+                reader.onload = function() {
+                    var dataURL = reader.result;
+                    var imageObj = new Image();
+                    imageObj.src = dataURL;
+                    enableMouseEvent();
+                    disableMouseEventVideo();
+                    imageObj.onload = function() {
+                        clearCanvas(imageObj.width, imageObj.height);
+                        context.drawImage(imageObj, 1, 1, imageObj.width, imageObj.height);
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        </script>
+    
+        <!-- Random image logic. -->
+        <script>
+            var bt_draw = document.getElementById('bt_draw');
+
+            bt_draw.addEventListener('click', function (e) {
+                clearCanvas(1200, 400);
+
+                enableMouseEvent();
+                disableMouseEventVideo();
+
+                artHandler();
+            });
+
+            artHandler();
+
+            function clearCanvas(width, height) {
+                stopWebcam();
+                var canvas = document.getElementById('canvas');
+                var context = canvas.getContext('2d');
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.canvas.width  = width;
+                context.canvas.height = height;
+            }
+
+            function getElementPosition(obj) {
+                var curleft = 0, curtop = 0;
+                if (obj.offsetParent) {
+                    do {
+                        curleft += obj.offsetLeft;
+                        curtop += obj.offsetTop;
+                    } while (obj = obj.offsetParent);
+                    return { x: curleft, y: curtop };
+                }
+                return undefined;
+            }
+
+            function getEventLocation(element,event){
+                var pos = getElementPosition(element);
+                return { x: (event.pageX - pos.x), y: (event.pageY - pos.y) };
+            }
+
+            function artHandler() {
+                var canvas = document.getElementById('canvas');
+                var context = canvas.getContext('2d');
+                var num = 10;
+                while( num --> 0 ) {
+                    drawCircle(canvas, context);
+                    drawRect(canvas, context);
+                    drawTriangle(canvas, context);
+                }
+            }
+
+            function getBackgroundColor() {
+                c = rgbToHex(Math.round(Math.random()*0xFF), Math.round(Math.random()*0xFF), Math.round(Math.random()*0xFF));
+                return '#'+c;
+            }
+
+            function degreesToRadians(degrees) {
+                return (degrees * Math.PI)/180;
+            }
+
+            // Draws a circle at a random location
+            function drawCircle(canvas, context) {
+                radius = Math.floor(Math.random() * 100);
+                x = Math.floor(Math.random() * canvas.width);
+                y = Math.floor(Math.random() * canvas.height);
+                context.beginPath();
+                context.arc(x, y, radius, 0, degreesToRadians(360), true);
+                context.fillStyle = getBackgroundColor();
+                context.fill();
+            }
+
+            function drawRect(canvas, context) {
+                context.fillStyle = getBackgroundColor();
+                context.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*200, Math.random()*200);
+            }
+
+            function drawTriangle(canvas, context) {
+                context.fillStyle = getBackgroundColor();
+                context.beginPath();
+                context.moveTo(Math.random()*canvas.width/2, Math.random()*canvas.height/2);
+                context.lineTo(Math.random()*canvas.width/2, Math.random()*canvas.height/2);
+                context.lineTo(Math.random()*canvas.width/2, Math.random()*canvas.height/2);
+                context.fill();
+            }
+
+            function rgbToHex(r, g, b) {
+                if (r > 255 || g > 255 || b > 255)
+                    throw "Invalid color component";
+                return ((r << 16) | (g << 8) | b).toString(16);
+            }
+
+        </script>
+    
+        <!-- Audio logic. -->
+        <script>
+            function GetFreq(color) {
+                intcolor = color.slice(1);
+                intcolor_16 = parseInt(intcolor, 16);
+                return 0.000888109260089*intcolor_16 + 100;
+            }
+
+            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var oscillators = [];
+
+            function getColorPosition(color) {
+                for (i in oscillators) {
+                    if (oscillators[i].color == color) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+
+            function turnOn(color) {
+                var osc = audioCtx.createOscillator();
+                osc.frequency.value = GetFreq(color);
+                osc.start();
+                osc.connect(audioCtx.destination);
+
+                oscillators.push({'color': color, 'osc': osc});
+            }
+
+            function turnOff(color) {
+                p = getColorPosition(color);
+                if (p != -1) {
+                    oscillators[p].osc.disconnect(audioCtx.destination);
+                    oscillators[p].osc.stop();
+                    oscillators.splice(p, 1);
+                }
+            }
+
+        </script>
+    
+        <!-- Mouse logic. -->
+        <script>
+            enableMouseEvent();
+
+            function enableMouseEvent() {
+                canvas.addEventListener("mousemove", getColor, false);
+                canvas.addEventListener("mouseout", getColorMouseout, false);
+            }
+
+            function disableMouseEvent() {
+                canvas.removeEventListener("mousemove", getColor, false);
+                canvas.removeEventListener("mouseout", getColorMouseout, false);
+            }
+
+            var old_color = null;
+
+            function getColor(e) {
+                eventLocation = getEventLocation(this, e);
+                context = this.getContext('2d');
+                pixelData = context.getImageData(eventLocation.x, eventLocation.y, 1, 1).data; 
+
+                var hex;
+
+                if (pixelData[3] == 0) {
+                    hex = null;
+                } else {
+                    hex = "#" + ("000000" + rgbToHex(pixelData[0], pixelData[1], pixelData[2])).slice(-6);
+                }
+
+                if (hex != old_color) {
+                    if (old_color != null) {
+                        SendData({'color': old_color, 'hover': false});
+                    }
+                    if (hex != null) {
+                        SendData({'color': hex, 'hover': true});
+                    }
+                }
+
+                old_color = hex;
+            }
+
+            function getColorMouseout(e) {
+                if (old_color != null) {
+                    SendData({'color': old_color, 'hover': false});
+                }
+            }
+        </script>
    
-        // Handle for Data sent from server.
-        function RecvData(msg) {
-            //alert('Data: ' + msg); 
-            console.log('Data: ' + JSON.stringify(msg)); 
+        <!-- WebRTC (datachannel) logic. -->
+        <script>
+            var in_roomName = document.getElementById('in_roomName');
+            var in_userName = document.getElementById('in_userName');
+            var bt_createRoom = document.getElementById('bt_createRoom');
+            var bt_joinRoom = document.getElementById('bt_joinRoom');
+            var bt_exitRoom = document.getElementById('bt_exitRoom');
 
-        var freq = {};
-        freq[1] = 1000;
-        freq[2] = 2000;
-        freq[3] = 5000;
-        freq[4] = 7000;
-        freq[5] = 10000;
-        freq[6] = 12000;
- 
+            bt_createRoom.addEventListener('click', function (e) {
+                CreateRoom(in_roomName.value, in_userName.value);
+            });
 
-            i = msg.i;
+            bt_joinRoom.addEventListener('click', function (e) {
+                JoinRoom(in_roomName.value, in_userName.value);
+            });
 
-            if (msg.hover == true && arr[i] === 0){
-                osc[i] = audioCtx.createOscillator();
-                osc[i].frequency.value = freq[i];
-                osc[i].connect(audioCtx.destination);
-                osc[i].start();
-                arr[i]=1;
-            } else if (msg.hover == false && arr[i] === 1){
-                osc[i].stop();
-                osc[i].disconnect(audioCtx.destination);
-                arr[i]=0;
-            }                        
-        }
-    </script>
+            bt_exitRoom.addEventListener('click', function (e) {
+                ExitRoom(in_roomName.value);
+            });
 
-</body>
+
+            // Handle for reply from server of CreateRoom.
+            function CreateRoomReply(msg) {
+                if (msg.status) {
+                    switch (msg.status) {
+                        case 'OK':
+                            alert('OK: ' + msg.description);
+                            break;
+                        case 'NOTOK':
+                            alert('NOTOK: ' + msg.description);
+                            break;
+                        case 'ERROR':
+                            alert('ERROR: ' + msg.description);
+                            break;
+                        default:
+                    }
+                }
+            }
+
+            // Handle for reply from server of JoinRoom.
+            function JoinRoomReply(msg) {
+                if (msg.status) {
+                    switch (msg.status) {
+                        case 'OK':
+                            alert('OK: ' + msg.description);
+                            break;
+                        case 'NOTOK':
+                            alert('NOTOK: ' + msg.description);
+                            break;
+                        case 'ERROR':
+                            alert('ERROR: ' + msg.description);
+                            break;
+                        default:
+                    }
+                }
+            }
+
+            // Handle for reply from server of ExitRoom.
+            function ExitRoomReply(msg) {
+                if (msg.status) {
+                    switch (msg.status) {
+                        case 'OK':
+                            alert('OK: ' + msg.description);
+                            break;
+                        case 'NOTOK':
+                            alert('NOTOK: ' + msg.description);
+                            break;
+                        case 'ERROR':
+                            alert('ERROR: ' + msg.description);
+                            break;
+                        default:
+                    }
+                }
+            }
+
+            // Handle for Data sent from server.
+            function RecvData(msg) {
+                console.log('Data: ' + JSON.stringify(msg)); 
+    
+                if (msg.hover == true) {
+                    turnOn(msg.color);
+                } else if (msg.hover == false) {
+                    turnOff(msg.color);
+                }
+            }
+        </script>
+    </body>
 </html>
