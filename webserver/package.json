@@ -1,0 +1,22 @@
+{
+  "name": "IFSC-SDR",
+  "version": "0.0.1",
+  "author": "Gustavo Paulo Medeiros da Silva",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.10.7",
+    "http": "*",
+    "memwatch-next": "^0.3.0",
+    "net": "*",
+    "os-utils": "0.0.14",
+    "socket.io": "^1.4.5",
+    "socket.io-client": "*"
+  },
+  "engines": {
+    "node": ">=0.8"
+  }
+}
